@@ -156,14 +156,14 @@ function updateUI() {
     
     if (points.length >= 3) {
         calculateBtn.disabled = false;
-        calculateBtn.textContent = '✓ Hitung Material';
+        calculateBtn.textContent = '✔ Hitung Material';
     } else {
         calculateBtn.disabled = true;
         calculateBtn.textContent = `Minimal 3 Titik (${points.length}/3)`;
     }
 }
 
-// Draw Canvas
+// Draw Canvas - GARIS DAN TEKS DIPERBESAR
 function drawCanvas() {
     if (!ctx || !canvas) return;
 
@@ -171,32 +171,32 @@ function drawCanvas() {
 
     // Draw points
     points.forEach((point, index) => {
-        // Point circle - DIPERBESAR
+        // Point circle - DIPERBESAR LEBIH BESAR
         ctx.beginPath();
-        ctx.arc(point.x, point.y, 15, 0, 2 * Math.PI);
+        ctx.arc(point.x, point.y, 20, 0, 2 * Math.PI);
         ctx.fillStyle = '#3B82F6';
         ctx.fill();
         ctx.strokeStyle = '#FFFFFF';
-        ctx.lineWidth = 4;
+        ctx.lineWidth = 5;
         ctx.stroke();
 
-        // Point label with background - DIPERBESAR
+        // Point label with background - DIPERBESAR LEBIH BESAR
         const label = `Titik ${index + 1}`;
-        ctx.font = 'bold 22px Arial';
+        ctx.font = 'bold 28px Arial';
         const textWidth = ctx.measureText(label).width;
         
         // Background
         ctx.fillStyle = 'rgba(0, 0, 0, 0.85)';
         ctx.beginPath();
-        ctx.roundRect(point.x + 22, point.y - 32, textWidth + 16, 32, 8);
+        ctx.roundRect(point.x + 28, point.y - 40, textWidth + 20, 40, 10);
         ctx.fill();
         
         // Text
         ctx.fillStyle = '#FFFFFF';
-        ctx.fillText(label, point.x + 30, point.y - 10);
+        ctx.fillText(label, point.x + 38, point.y - 12);
     });
 
-    // Draw lines
+    // Draw lines - GARIS DIPERBESAR SANGAT TEBAL
     if (points.length > 1) {
         ctx.beginPath();
         ctx.moveTo(points[0].x, points[0].y);
@@ -206,17 +206,17 @@ function drawCanvas() {
         if (points.length > 2) {
             ctx.lineTo(points[0].x, points[0].y);
         }
-        // GARIS DIPERBESAR DAN LEBIH TEBAL
+        // GARIS SUPER TEBAL
         ctx.strokeStyle = '#FFFFFF';
-        ctx.lineWidth = 6;
-        ctx.setLineDash([20, 12]);
-        ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
-        ctx.shadowBlur = 8;
+        ctx.lineWidth = 10; // Diperbesar dari 6 ke 10
+        ctx.setLineDash([25, 15]); // Dash lebih panjang
+        ctx.shadowColor = 'rgba(0, 0, 0, 0.7)';
+        ctx.shadowBlur = 12;
         ctx.stroke();
         ctx.setLineDash([]);
         ctx.shadowBlur = 0;
 
-        // Draw distances - DIPERBESAR
+        // Draw distances - TEKS DIPERBESAR SANGAT BESAR
         for (let i = 0; i < points.length; i++) {
             const nextIndex = (i + 1) % points.length;
             if (i === points.length - 1 && points.length <= 2) break;
@@ -235,23 +235,26 @@ function drawCanvas() {
                 distanceText = `${distance.toFixed(1)} cm`;
             }
 
-            // Measure text width for background - FONT DIPERBESAR
-            ctx.font = 'bold 20px Arial';
+            // Measure text width for background - FONT SUPER BESAR
+            ctx.font = 'bold 32px Arial'; // Diperbesar dari 20px ke 32px
             const distTextWidth = ctx.measureText(distanceText).width;
             
-            // Background - DIPERBESAR
+            // Background - DIPERBESAR LEBIH BESAR
             ctx.fillStyle = 'rgba(59, 130, 246, 0.95)';
-            ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
-            ctx.shadowBlur = 6;
+            ctx.shadowColor = 'rgba(0, 0, 0, 0.7)';
+            ctx.shadowBlur = 10;
             ctx.beginPath();
-            ctx.roundRect(midX - distTextWidth/2 - 12, midY - 20, distTextWidth + 24, 36, 8);
+            ctx.roundRect(midX - distTextWidth/2 - 18, midY - 28, distTextWidth + 36, 52, 12);
             ctx.fill();
             ctx.shadowBlur = 0;
             
-            // Text - LEBIH BESAR
+            // Text - SUPER BESAR DAN TEBAL
             ctx.fillStyle = '#FFFFFF';
             ctx.textAlign = 'center';
-            ctx.fillText(distanceText, midX, midY + 6);
+            ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
+            ctx.shadowBlur = 4;
+            ctx.fillText(distanceText, midX, midY + 10);
+            ctx.shadowBlur = 0;
         }
     }
 
