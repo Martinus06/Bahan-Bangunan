@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pengukur AR - Kalkulator Material Bangunan</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="header">
+        <div class="header-content">
+            <div class="header-title">
+                📷 Pengukur AR
+            </div>
+            <div>Ukur Titik ke Titik</div>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- Landing Screen -->
+        <div id="landingScreen">
+            <div class="video-container">
+                <div class="placeholder">➕</div>
+            </div>
+
+            <div class="instructions">
+                <button class="btn-primary" onclick="startAR()" style="width: 100%; margin-bottom: 16px;">
+                    📷 Buka Kamera AR untuk memulai
+                </button>
+                
+                <p class="warning">⚠️ Cara Menggunakan:</p>
+                <ol>
+                    <li>Buka kamera AR dan arahkan ke area yang ingin diukur</li>
+                    <li>Gerakkan perangkat perlahan untuk tracking 3D</li>
+                    <li>Pilih kategori pengukuran (Lantai/Tembok/Plafon)</li>
+                    <li>Tap "Tandai Titik" untuk titik pertama</li>
+                    <li>Gerakkan ke titik kedua, lalu tap "Tandai Titik" lagi</li>
+                    <li>Jarak otomatis terhitung menggunakan sensor AR</li>
+                </ol>
+            </div>
+
+            <div class="calculator">
+                <h2>🧮 Dimensi untuk Kalkulator</h2>
+                
+                <div class="form-group">
+                    <label>Kategori</label>
+                    <select id="manualCategory" class="form-select">
+                        <option value="lantai">🟦 Lantai</option>
+                        <option value="tembok">🧱 Tembok</option>
+                        <option value="plafon">⬜ Plafon</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label>Panjang (meter)</label>
+                    <input type="number" id="panjang" placeholder="Dari pengukuran atau input manual" step="0.01">
+                </div>
+                
+                <div class="form-group">
+                    <label>Lebar (meter)</label>
+                    <input type="number" id="lebar" placeholder="Dari pengukuran atau input manual" step="0.01">
+                </div>
+                
+                <div class="form-group">
+                    <label>Tinggi (meter) - Opsional</label>
+                    <input type="number" id="tinggi" placeholder="Untuk menghitung volume" step="0.01">
+                </div>
+
+                <button class="btn-large" onclick="hitungMaterialManual()">
+                    📊 Hitung Material
+                </button>
+            </div>
+        </div>
+
+        <!-- AR Screen -->
+        <div id="arScreen" class="hidden">
+            <!-- Category Selector -->
+            <div class="category-selector">
+                <button class="category-btn active" data-category="lantai" onclick="selectCategory('lantai')">
+                    🟦 Lantai
+                </button>
+                <button class="category-btn" data-category="tembok" onclick="selectCategory('tembok')">
+                    🧱 Tembok
+                </button>
+                <button class="category-btn" data-category="plafon" onclick="selectCategory('plafon')">
+                    ⬜ Plafon
+                </button>
+            </div>
+
+            <div class="video-container">
+                <video id="video" autoplay playsinline></video>
+                <canvas id="canvas"></canvas>
+                
+                <!-- Crosshair di tengah -->
+                <div class="crosshair">
+                    <div class="crosshair-inner"></div>
+                    <div class="crosshair-label">Arahkan ke titik</div>
+                </div>
+                
+                <div class="info-overlay">
+                    <p><strong>Kategori: <span id="currentCategory">Lantai</span></strong></p>
+                    <p><strong>Titik: <span id="pointCount">0</span></strong></p>
+                </div>
+
+                <!-- Kalibrasi Slider -->
+                <div class="calibration-overlay">
+                    <label>📏 Kalibrasi:</label>
+                    <input type="range" id="calibrationSlider" min="0.5" max="3" value="1" step="0.1">
+                    <span id="calibrationValue">1.0x</span>
+                </div>
+            </div>
+
+            <!-- Tombol Tandai Titik di luar kamera -->
+            <button class="btn-mark-point" onclick="addPointAtCenter()">
+                ✚ TANDAI TITIK
+            </button>
+
+            <div class="button-grid">
+                <button class="btn-danger" onclick="resetMeasurement()">
+                    🔄 Reset
+                </button>
+                <button id="calculateBtn" class="btn-success" onclick="calculateArea()" disabled>
+                    Minimal 3 Titik
+                </button>
+            </div>
+
+            <button class="btn-secondary" onclick="stopAR()">
+                Tutup Kamera
+            </button>
+        </div>
+    </div>
+
+    <!-- Modal Results -->
+    <div id="resultsModal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Hasil Perhitungan</h2>
+                <button class="close-btn" onclick="closeModal()">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="area-info">
+                    <p class="category-badge" id="modalCategory">🟦 Lantai</p>
+                    <p class="label">Luas Area</p>
+                    <p class="value"><span id="areaValue">0</span> m²</p>
+                    <p class="perimeter">Keliling: <span id="perimeterValue">0</span> m</p>
+                </div>
+
+                <div class="materials">
+                    <h3>Material yang Dibutuhkan:</h3>
+                    <div id="materialsList"></div>
+                </div>
+
+                <div class="note">
+                    <p class="note-title">💡 Catatan:</p>
+                    <ul>
+                        <li>Perhitungan sudah termasuk toleransi 10%</li>
+                        <li>Material disesuaikan dengan kategori yang dipilih</li>
+                        <li>Untuk hasil akurat, gunakan AR measurement</li>
+                        <li>Konsultasikan dengan tukang berpengalaman</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
